@@ -1,6 +1,6 @@
 {
    "name": "@itsliaaa/baileys",
-   "version": "0.1.19",
+   "version": "0.1.20",
    "description": "A lightweight fork of Baileys with practical fixes and small but meaningful improvements.",
    "main": "lib/index.js",
    "type": "module",

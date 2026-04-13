@@ -3,6 +3,8 @@
 [![Logo](https://files.catbox.moe/c5s9g0.jpg)](https://www.npmjs.com/package/@itsliaaa/baileys)
 
 <p align="center">
+   A lightweight fork of Baileys with practical fixes and small but meaningful improvements.
+   <br><br>
    <a href="https://www.npmjs.com/package/@itsliaaa/baileys">
       <img src="https://img.shields.io/npm/v/@itsliaaa/baileys?color=FFFFFF&labelColor=red&logo=npm&logoColor=white&style=for-the-badge"/>
    </a>
@@ -23,11 +25,11 @@
    </a>
 </p>
 
-A lightweight fork of Baileys with practical fixes and small but meaningful improvements.
+☕ For donation: [Saweria](https://saweria.co/itsliaaa)
 
 ### ✨ Highlights
 
-This fork focuses on clarity and safety:
+This fork designed for production use with a focus on clarity and safety:
 
 - 🚫 No obfuscation. Easy to read and audit.
 - 🚫 No auto-follow channel (newsletter) behavior.
@@ -47,6 +49,7 @@ This fork focuses on clarity and safety:
    - [group status messages](#4%EF%B8%8F⃣-group-status)
    - [status mention messages](#%EF%B8%8F-status-mention)
    - [sticker pack messages](#-sticker-pack)
+   - [rich response messages](#-rich-response)
    - [messages with code blocks](#-message-with-code-block)
    - [messages with tables](#-message-with-table)
    - [payment-related messages](#-sending-payment-messages) (payment requests, invites, orders, invoices).
@@ -314,7 +317,7 @@ const vcard = 'BEGIN:VCARD\n'
 
 sock.sendMessage(jid, {
    contacts: {
-      displayName: 'Lia',
+      displayName: 'Lia Wynn',
       contacts: [
          { vcard }
       ]
@@ -402,6 +405,47 @@ sock.sendMessage(jid, {
 ```javascript
 sock.sendMessage([jidA, jidB, jidC], {
    text: 'Hello! 👋🏻'
+})
+```
+
+##### ✨ Rich Response
+
+> [!NOTE]
+`richResponse[]` is a representation of [`submessages[]`](https://baileys.wiki/docs/api/namespaces/proto/interfaces/IAIRichResponseSubMessage) inside `richResponseMessage`.
+
+> [!TIP]
+You can still use the original [`submessages[]`](https://baileys.wiki/docs/api/namespaces/proto/interfaces/IAIRichResponseSubMessage) field directly.
+> The code example below is just an implementation using a helper, not a required structure.
+
+```javascript
+sock.sendMessage(jid, {
+   richResponse: [{
+      text: 'Example Usage',
+   }, {
+      language: 'javascript',
+      code: [{
+         highlightType: 0,
+         codeContent: 'console.log("Hello, World!")'
+      }]
+   }, {
+      text: 'Pretty simple, right?\n'
+   }, {
+      text: 'Comparison between Node.js, Bun, and Deno',
+   }, {
+      title: 'Runtime Comparison',
+      table: [{
+         isHeading: true,
+         items: ['', 'Node.js', 'Bun', 'Deno']
+      }, {
+         isHeading: false,
+         items: ['Engine', 'V8 (C++)', 'JavaScriptCore (C++)', 'V8 (C++)']
+      }, {
+         isHeading: false,
+         items: ['Performance', '4/5', '5/5', '4/5']
+      }]
+   }, {
+      text: 'Does this help clarify the differences?'
+   }]
 })
 ```
 
