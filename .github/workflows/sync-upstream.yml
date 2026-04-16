@@ -2,7 +2,7 @@ name: Sync Upstream
 
 on:
   schedule:
-    # Check every 6 hours (00:00, 06:00, 12:00, 18:00 UTC)
+    # Check every 6 hours
     - cron: '17 */6 * * *'
   workflow_dispatch:
     inputs:
@@ -11,7 +11,7 @@ on:
         required: false
         default: ''
       dry_run:
-        description: 'Dry run — show what would be applied without committing'
+        description: 'Dry run - show what would be applied without committing'
         type: boolean
         default: false
 
@@ -55,29 +55,27 @@ jobs:
 
           if [ -z "$COMMITS" ]; then
             echo "status=up-to-date" >> "$GITHUB_OUTPUT"
-            echo "count=0"          >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
           else
             COUNT=$(echo "$COMMITS" | wc -l | tr -d ' ')
             echo "status=has-updates" >> "$GITHUB_OUTPUT"
-            echo "count=$COUNT"       >> "$GITHUB_OUTPUT"
-            # Write commits to a temp file (avoids multiline output issues)
+            echo "count=$COUNT" >> "$GITHUB_OUTPUT"
             echo "$COMMITS" > /tmp/upstream_commits.txt
           fi
           echo "merge_base=$MERGE_BASE" >> "$GITHUB_OUTPUT"
 
-      - name: Report — nothing to do
+      - name: Report - nothing to do
         if: steps.diff.outputs.status == 'up-to-date'
-        run: echo "✅ Fork is already up to date with upstream."
+        run: echo "Already up to date with upstream."
 
-      - name: Dry run — list commits
+      - name: Dry run - list commits
         if: |
           steps.diff.outputs.status == 'has-updates' &&
           github.event.inputs.dry_run == 'true'
         run: |
-          echo "## 🔍 Dry run — ${{ steps.diff.outputs.count }} upstream commit(s) would be applied"
-          echo ""
+          echo "Dry run - ${{ steps.diff.outputs.count }} upstream commit(s) would be applied:"
           while IFS='|||' read -r sha msg author date; do
-            echo "  $sha  [$date] $author — $msg"
+            echo "  $sha  [$date] $author - $msg"
           done < /tmp/upstream_commits.txt
 
       - name: Apply upstream commits
@@ -86,56 +84,44 @@ jobs:
           github.event.inputs.dry_run != 'true'
         id: apply
         run: |
-          APPLIED=0; SKIPPED=0
-          SUMMARY=""
+          APPLIED=0
+          SKIPPED=0
 
           while IFS='|||' read -r sha msg author date; do
             SHORT="${sha:0:10}"
 
-            # Skip if same commit message already in our history (already ported)
             if git log --format="%s" HEAD | grep -qF "$msg"; then
-              echo "⏭  SKIP (already ported): $SHORT — $msg"
+              echo "SKIP (already ported): $SHORT - $msg"
               SKIPPED=$((SKIPPED + 1))
-              SUMMARY="${SUMMARY}\n⏭ SKIP  \`$SHORT\` $msg"
               continue
             fi
 
-            echo "⚙️  Applying $SHORT: $msg"
+            echo "Applying $SHORT: $msg"
 
-            # cherry-pick: on conflict keep OUR version (-X ours)
-            # This preserves fork customisations when upstream touches the same file
             if git cherry-pick --strategy=recursive -X ours --no-commit "$sha" 2>/tmp/cp_err; then
               if git diff --cached --quiet; then
-                echo "⚪  NOOP (no diff): $SHORT — $msg"
+                echo "NOOP (no diff): $SHORT - $msg"
                 git cherry-pick --abort 2>/dev/null || true
                 SKIPPED=$((SKIPPED + 1))
-                SUMMARY="${SUMMARY}\n⚪ NOOP  \`$SHORT\` $msg"
               else
                 ORIG_BODY=$(git log --format="%B" -1 "$sha")
                 git commit -m "$ORIG_BODY
 
 upstream-commit: $sha" --quiet
-                echo "✅  APPLIED: $SHORT — $msg"
+                echo "APPLIED: $SHORT - $msg"
                 APPLIED=$((APPLIED + 1))
-                SUMMARY="${SUMMARY}\n✅ APPLY \`$SHORT\` $msg"
               fi
             else
               CP_ERR=$(cat /tmp/cp_err | head -5)
               git cherry-pick --abort 2>/dev/null || true
-              echo "⚠️  CONFLICT (kept fork): $SHORT — $msg"
-              echo "   $CP_ERR"
+              echo "CONFLICT (kept fork): $SHORT - $msg"
               SKIPPED=$((SKIPPED + 1))
-              SUMMARY="${SUMMARY}\n⚠️ SKIP  \`$SHORT\` (conflict) $msg"
             fi
 
           done < /tmp/upstream_commits.txt
 
-          echo "applied=$APPLIED"   >> "$GITHUB_OUTPUT"
-          echo "skipped=$SKIPPED"   >> "$GITHUB_OUTPUT"
-          # Encode summary for multiline
-          echo "summary<<EOF"       >> "$GITHUB_OUTPUT"
-          echo -e "$SUMMARY"        >> "$GITHUB_OUTPUT"
-          echo "EOF"                >> "$GITHUB_OUTPUT"
+          echo "applied=$APPLIED" >> "$GITHUB_OUTPUT"
+          echo "skipped=$SKIPPED" >> "$GITHUB_OUTPUT"
 
       - name: Push changes
         if: |
@@ -144,19 +130,12 @@ upstream-commit: $sha" --quiet
           steps.apply.outputs.applied != '0'
         run: |
           git push origin main
-          echo "🚀 Pushed ${{ steps.apply.outputs.applied }} new commit(s) to fork."
+          echo "Pushed ${{ steps.apply.outputs.applied }} new commit(s) to fork."
 
       - name: Job summary
-        if: steps.diff.outputs.status == 'has-updates'
+        if: always()
         run: |
-          echo "## 🔄 Upstream Sync Result" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "> **Dry run** — no commits were applied." >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- ✅ Applied: **${{ steps.apply.outputs.applied }}**" >> "$GITHUB_STEP_SUMMARY"
-            echo "- ⏭  Skipped: **${{ steps.apply.outputs.skipped }}**" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "### Commits" >> "$GITHUB_STEP_SUMMARY"
-          echo -e "${{ steps.apply.outputs.summary }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Sync Result" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Status: ${{ steps.diff.outputs.status }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Applied: ${{ steps.apply.outputs.applied || 0 }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Skipped: ${{ steps.apply.outputs.skipped || 0 }}" >> "$GITHUB_STEP_SUMMARY"
