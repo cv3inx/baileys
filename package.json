@@ -1,5 +1,5 @@
 {
-   "name": "@itsliaaa/baileys",
+   "name": "@violetix/baileys",
    "version": "0.1.21",
    "description": "Enhanced Baileys v7 with fixed newsletter media upload, plus support for interactive messages, albums, and more message types.",
    "main": "lib/index.js",
@@ -12,7 +12,7 @@
    },
    "repository": {
       "type": "git",
-      "url": "git+https://github.com/itsliaaa/baileys.git"
+      "url": "git+https://github.com/cv3inx/baileys.git"
    },
    "files": [
       "lib/**/*",
@@ -33,7 +33,7 @@
       "whatsapp-group",
       "whatsapp-web"
    ],
-   "homepage": "https://github.com/itsliaaa/baileys#readme",
+   "homepage": "https://github.com/cv3inx/baileys#readme",
    "author": "Lia Wynn",
    "license": "MIT",
    "dependencies": {
