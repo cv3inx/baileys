@@ -105,9 +105,7 @@ jobs:
                 SKIPPED=$((SKIPPED + 1))
               else
                 ORIG_BODY=$(git log --format="%B" -1 "$sha")
-                git commit -m "$ORIG_BODY
-
-upstream-commit: $sha" --quiet
+                git commit -m "${ORIG_BODY}"$'\n\n'"upstream-commit: ${sha}" --quiet
                 echo "APPLIED: $SHORT - $msg"
                 APPLIED=$((APPLIED + 1))
               fi
