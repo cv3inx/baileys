@@ -87,6 +87,13 @@ jobs:
           APPLIED=0
           SKIPPED=0
 
+          PROTECTED=(
+            ".claude/settings.json"
+            ".claude/settings.local.json"
+            ".github/workflows/sync-upstream.yml"
+            "scripts/sync-upstream.sh"
+          )
+
           while IFS='|||' read -r sha msg author date; do
             SHORT="${sha:0:10}"
 
@@ -99,9 +106,17 @@ jobs:
             echo "Applying $SHORT: $msg"
 
             if git cherry-pick --strategy=recursive -X ours --no-commit "$sha" 2>/tmp/cp_err; then
+              for p in "${PROTECTED[@]}"; do
+                if git ls-files --error-unmatch -- "$p" >/dev/null 2>&1; then
+                  git checkout HEAD -- "$p" 2>/dev/null || true
+                  git reset HEAD -- "$p" >/dev/null 2>&1 || true
+                fi
+              done
+
               if git diff --cached --quiet; then
-                echo "NOOP (no diff): $SHORT - $msg"
+                echo "NOOP (no diff after protect): $SHORT - $msg"
                 git cherry-pick --abort 2>/dev/null || true
+                git checkout -- . 2>/dev/null || true
                 SKIPPED=$((SKIPPED + 1))
               else
                 ORIG_BODY=$(git log --format="%B" -1 "$sha")
