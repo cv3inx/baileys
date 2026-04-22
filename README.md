@@ -41,10 +41,9 @@ Hi everyone,
 >
 > Recently, I found a few packages published on npm that are essentially just **renamed** versions of a fork I personally worked on:
 >
-> - https://www.npmjs.com/package/@noya4u_27/baileys
-> - https://www.npmjs.com/package/@phrolovaa/baileys
-> - https://www.npmjs.com/package/@dnuzi/baileys
-> - https://www.npmjs.com/package/@crysnovax/baileys
+> - [@noya4u_27](https://www.npmjs.com/package/@noya4u_27/baileys) **[STEALER]**
+> - [@phrolovaa](https://www.npmjs.com/package/@phrolovaa/baileys) **[STEALER]**
+> - [@dnuzi](https://www.npmjs.com/package/@dnuzi/baileys) **[STEALER]**
 >
 > To be clear, I’m **not** the original maintainer of Baileys all respect goes to the amazing work behind [@whiskeysockets/baileys](https://github.com/WhiskeySockets/Baileys). I only created and maintained my own fork ([@itsliaaa/baileys](https://www.npmjs.com/package/@itsliaaa/baileys)) where I spent a **lot** of time improving and adapting things on my own.
 >
@@ -827,7 +826,8 @@ sock.sendMessage(jid, {
       copy: '@itsliaaa/baileys'
    }, {
       text: '🌐 Source',
-      url: 'https://www.npmjs.com/package/@itsliaaa/baileys'
+      url: 'https://www.npmjs.com/package/@itsliaaa/baileys',
+      useWebview: true // --- Optional
    }, {
       text: '📋 Select',
       sections: [{
@@ -867,7 +867,8 @@ sock.sendMessage(jid, {
       footer: '🏷️️ Pinterest',
       nativeFlow: [{
          text: '🌐 Source',
-         url: 'https://www.npmjs.com/package/@itsliaaa/baileys'
+         url: 'https://www.npmjs.com/package/@itsliaaa/baileys',
+         useWebview: true
       }]
    }, {
       image: {
@@ -897,7 +898,8 @@ sock.sendMessage(jid, {
       offerExpiration: Date.now() + 3_600_000,
       nativeFlow: [{
          text: '🛒 Product',
-         id: '#Product'
+         id: '#Product',
+         icon: 'default' // --- Optional
       }, {
          text: '🌐 Source',
          url: 'https://www.npmjs.com/package/@itsliaaa/baileys'
