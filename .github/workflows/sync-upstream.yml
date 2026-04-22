@@ -51,7 +51,7 @@ jobs:
             RANGE="${MERGE_BASE}..upstream/main"
           fi
 
-          COMMITS=$(git log --reverse --pretty=format:"%H|||%s|||%an|||%cd" --date=short "$RANGE" 2>/dev/null || true)
+          COMMITS=$(git log --reverse --pretty=format:"%H	%s	%an	%cd" --date=short "$RANGE" 2>/dev/null || true)
 
           if [ -z "$COMMITS" ]; then
             echo "status=up-to-date" >> "$GITHUB_OUTPUT"
@@ -74,7 +74,7 @@ jobs:
           github.event.inputs.dry_run == 'true'
         run: |
           echo "Dry run - ${{ steps.diff.outputs.count }} upstream commit(s) would be applied:"
-          while IFS='|||' read -r sha msg author date; do
+          while IFS=$'\t' read -r sha msg author date; do
             echo "  $sha  [$date] $author - $msg"
           done < /tmp/upstream_commits.txt
 
@@ -94,10 +94,10 @@ jobs:
             "scripts/sync-upstream.sh"
           )
 
-          while IFS='|||' read -r sha msg author date; do
+          while IFS=$'\t' read -r sha msg author date; do
             SHORT="${sha:0:10}"
 
-            if git log --format="%s" HEAD | grep -qF "$msg"; then
+            if [ -n "$msg" ] && git log --format="%s" HEAD | grep -qxF "$msg"; then
               echo "SKIP (already ported): $SHORT - $msg"
               SKIPPED=$((SKIPPED + 1))
               continue
