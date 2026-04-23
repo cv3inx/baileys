@@ -41,9 +41,12 @@ Hi everyone,
 >
 > Recently, I found a few packages published on npm that are essentially just **renamed** versions of a fork I personally worked on:
 >
-> - [@noya4u_27](https://www.npmjs.com/package/@noya4u_27/baileys) **[STEALER]**
-> - [@phrolovaa](https://www.npmjs.com/package/@phrolovaa/baileys) **[STEALER]**
+> - ~[RESOLVED]~
+> - ~[RESOLVED]~
+> - ~[RESOLVED]~
+> - [@zackmans](https://www.npmjs.com/package/@zackmans/baileys) **[STEALER]**
 > - [@dnuzi](https://www.npmjs.com/package/@dnuzi/baileys) **[STEALER]**
+> - ["Update rich.js"](https://github.com/gcamerator/mbaileys/commits/main/) **[STEALER]**
 >
 > To be clear, I’m **not** the original maintainer of Baileys all respect goes to the amazing work behind [@whiskeysockets/baileys](https://github.com/WhiskeySockets/Baileys). I only created and maintained my own fork ([@itsliaaa/baileys](https://www.npmjs.com/package/@itsliaaa/baileys)) where I spent a **lot** of time improving and adapting things on my own.
 >
@@ -892,7 +895,7 @@ sock.sendMessage(jid, {
    image: {
       url: './path/to/image.jpg'
    },
-   caption: '??️ Interactive!',
+   caption: '🗄️️ Interactive!',
    footer: '@itsliaaa/baileys',
    optionText: '👉🏻 Select Options', // --- Optional, wrap all native flow into a single list
    optionTitle: '📄 Select Options', // --- Optional
@@ -1484,3 +1487,4 @@ This fork uses Protocol Buffer definitions maintained by [WPP Connect](https://g
 > - [adiwajshing](https://github.com/adiwajshing)
 >
 > This fork includes additional enhancements and modifications by [Lia Wynn](https://github.com/itsliaaa)
+> **Credits are mandatory and must remain unchanged in any form of redistribution or fork.**
