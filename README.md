@@ -34,30 +34,8 @@ This fork designed for production use with a focus on clarity and safety:
 - 🚫 No obfuscation. Easy to read and audit.
 - 🚫 No auto-follow channel (newsletter) behavior.
 
-> [!IMPORTANT]
-Hi everyone,
->
-> I want to share something that’s been weighing on me a bit.
->
-> Recently, I found a few packages published on npm that are essentially just **renamed** versions of a fork I personally worked on:
->
-> - ~[RESOLVED]~
-> - ~[RESOLVED]~
-> - ~[RESOLVED]~
-> - [@zackmans](https://www.npmjs.com/package/@zackmans/baileys) **[STEALER]**
-> - [@dnuzi](https://www.npmjs.com/package/@dnuzi/baileys) **[STEALER]**
-> - ["Update rich.js"](https://github.com/gcamerator/mbaileys/commits/main/) **[STEALER]**
->
-> To be clear, I’m **not** the original maintainer of Baileys all respect goes to the amazing work behind [@whiskeysockets/baileys](https://github.com/WhiskeySockets/Baileys). I only created and maintained my own fork ([@itsliaaa/baileys](https://www.npmjs.com/package/@itsliaaa/baileys)) where I spent a **lot** of time improving and adapting things on my own.
->
-> **It’s honestly a bit disheartening to see my fork being republished under different names without any acknowledgment or credit.** I put a lot of late nights and personal effort into it, so seeing it circulate like this feels… quietly painful.
->
-> If you come across these packages, I’d really appreciate it if you could take a closer look and, if appropriate, **help report them to npm.** More than anything, I just hope for a bit of fairness and proper recognition for the work that people put in.
->
-> Thank you for taking the time to read this 🤍
-
 > [!NOTE]
-📄 This project is maintained with limited scope and is not intended to replace upstream Baileys.
+> 📄 This project is maintained with limited scope and is not intended to replace upstream Baileys.
 >
 > 😞 And, really sorry for my bad english.
 
@@ -154,6 +132,7 @@ Hi everyone,
    - [👤 Profile Management](#-profile-management)
    - [🔐 Privacy Management](#-privacy-management)
    - [📡 Events](#-events)
+- [🚀 Try It](#-try-it)
 - [📦 Fork Base](#-fork-base)
 - [📣 Credits](#-credits)
 
@@ -249,10 +228,13 @@ const connectToWhatsApp = async () => {
 connectToWhatsApp()
 ```
 
+> [!NOTE]
+> You can use the experimental `useSingleFileAuthState` as an alternative to `useMultiFileAuthState`. However, `useSingleFileAuthState` already includes an internal caching mechanism, so there is no need to wrap `creds.key` with `makeCacheableSignalKeyStore`.
+
 ### 🗄️ Implementing Data Store
 
 > [!CAUTION]
-I highly recommend building your own data store, as keeping an entire chat history in memory can lead to excessive RAM usage.
+> I highly recommend building your own data store, as keeping an entire chat history in memory can lead to excessive RAM usage.
 
 ```javascript
 import { makeWASocket, makeInMemoryStore, delay, DisconnectReason, useMultiFileAuthState } from '@itsliaaa/baileys'
@@ -335,15 +317,30 @@ connectToWhatsApp()
 ### ✉️ Sending Messages
 
 > [!NOTE]
-You can get the `jid` from `message.key.remoteJid` in the first example.
+> You can get the `jid` from `message.key.remoteJid` in the first example.
 
 #### 🔠 Text
 
 ```javascript
+// --- Regular text message
 sock.sendMessage(jid, {
    text: '👋🏻 Hello'
 }, {
    quoted: message
+})
+
+// --- Text message with link preview
+const url = 'https://www.npmjs.com/package/@itsliaaa/baileys'
+
+sock.sendMessage(jid, {
+   text: '👉🏻 Check it out! ' + url,
+   linkPreview: {
+      'matched-text': url,
+      title: '🌱 @itsliaaa/baileys',
+      description: 'Underrated Baileys Fork',
+      previewType: 0, // --- Or 1 for video playback
+      jpegThumbnail: fs.readFileSync('./path/to/image.jpg')
+   }
 })
 ```
 
@@ -576,10 +573,10 @@ sock.sendMessage(jid, {
 #### ✨ Rich Response
 
 > [!NOTE]
-`richResponse[]` is a representation of [`submessages[]`](https://baileys.wiki/docs/api/namespaces/proto/interfaces/IAIRichResponseSubMessage) inside `richResponseMessage`.
+> `richResponse[]` is a representation of [`submessages[]`](https://baileys.wiki/docs/api/namespaces/proto/interfaces/IAIRichResponseSubMessage) inside `richResponseMessage`.
 
 > [!TIP]
-You can still use the original [`submessages[]`](https://baileys.wiki/docs/api/namespaces/proto/interfaces/IAIRichResponseSubMessage) field directly.
+> You can still use the original [`submessages[]`](https://baileys.wiki/docs/api/namespaces/proto/interfaces/IAIRichResponseSubMessage) field directly.
 > The code example below is just an implementation using a helper, not a required structure.
 
 ```javascript
@@ -615,7 +612,7 @@ sock.sendMessage(jid, {
 ```
 
 > [!TIP]
-You can easily add syntax highlighting by importing `tokenizeCode` directly from Baileys.
+> You can easily add syntax highlighting by importing `tokenizeCode` directly from Baileys.
 
 ```javascript
 import { tokenizeCode } from '@itsliaaa/baileys'
@@ -638,7 +635,7 @@ sock.sendMessage(jid, {
 #### 🧾 Message with Code Block
 
 > [!NOTE]
-This feature already includes a built-in tokenizer.
+> This feature already includes a built-in tokenizer.
 
 ```javascript
 sock.sendMessage(jid, {
@@ -701,7 +698,7 @@ sock.sendMessage([jidA, jidB, jidC], {
 ### 📁 Sending Media Messages
 
 > [!NOTE]
-For media messages, you can pass a `Buffer` directly, or an object with either `{ stream: Readable }` or `{ url: string }` (local file path or HTTP/HTTPS URL).
+> For media messages, you can pass a `Buffer` directly, or an object with either `{ stream: Readable }` or `{ url: string }` (local file path or HTTP/HTTPS URL).
 
 #### 🖼️ Image
 
@@ -803,7 +800,7 @@ sock.sendMessage(jid, {
 #### 📦 Sticker Pack
 
 > [!IMPORTANT]
-If `sharp` or `@napi-rs/image` is not installed, the `cover` and `stickers` must already be in WebP format.
+> If `sharp` or `@napi-rs/image` is not installed, the `cover` and `stickers` must already be in WebP format.
 
 ```javascript
 sock.sendMessage(jid, {
@@ -887,7 +884,7 @@ sock.sendMessage(jid, {
 #### 2️⃣ List
 
 > [!NOTE]
-It only works in private chat (`@s.whatsapp.net`).
+> It only works in private chat (`@s.whatsapp.net`).
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1065,7 +1062,7 @@ sock.sendMessage(jid, {
 #### 2️⃣ Invoice
 
 > [!NOTE]
-Invoice message are not supported yet.
+> Invoice message are not supported yet.
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1101,7 +1098,7 @@ sock.sendMessage(jid, {
 #### 1️⃣ AI Icon
 
 > [!NOTE]
-It only works in private chat (`@s.whatsapp.net`).
+> It only works in private chat (`@s.whatsapp.net`).
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1118,7 +1115,7 @@ sock.sendMessage(jid, {
 #### 2️⃣ Ephemeral
 
 > [!NOTE]
-Wrap message into `ephemeralMessage`
+> Wrap message into `ephemeralMessage`
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1133,7 +1130,7 @@ sock.sendMessage(jid, {
 #### 3️⃣ External Ad Reply
 
 > [!NOTE]
-Add an ad thumbnail to messages (may not be displayed on some WhatsApp versions).
+> Add an ad thumbnail to messages (may not be displayed on some WhatsApp versions).
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1153,7 +1150,7 @@ sock.sendMessage(jid, {
 #### 4️⃣ Group Status
 
 > [!NOTE]
-It only works in group chat (`@g.us`)
+> It only works in group chat (`@g.us`)
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1199,7 +1196,7 @@ sock.sendMessage(jid, {
 #### 7️⃣ View Once
 
 > [!NOTE]
-Wrap message into `viewOnceMessage`
+> Wrap message into `viewOnceMessage`
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1214,7 +1211,7 @@ sock.sendMessage(jid, {
 #### 8️⃣ View Once V2
 
 > [!NOTE]
-Wrap message into `viewOnceMessageV2`
+> Wrap message into `viewOnceMessageV2`
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1229,7 +1226,7 @@ sock.sendMessage(jid, {
 #### 9️⃣ View Once V2 Extension
 
 > [!NOTE]
-Wrap message into `viewOnceMessageV2Extension`
+> Wrap message into `viewOnceMessageV2Extension`
 
 ```javascript
 sock.sendMessage(jid, {
@@ -1272,7 +1269,7 @@ sock.sendMessage(jid, {
 #### 🏷️ Find User ID (JID|PN/LID)
 
 > [!NOTE]
-The ID must contain numbers only (no +, (), or -) and must include the country code with WhatsApp ID format.
+> The ID must contain numbers only (no +, (), or -) and must include the country code with WhatsApp ID format.
 
 ```javascript
 // --- PN (Phone Number)
@@ -1305,7 +1302,7 @@ console.log('🏷️ Got user ID', ':', ids)
 #### 🔑 Request Custom Pairing Code
 
 > [!NOTE]
-The phone number must contain numbers only (no +, (), or -) and must include the country code.
+> The phone number must contain numbers only (no +, (), or -) and must include the country code.
 
 ```javascript
 const phoneNumber = '6281111111111'
@@ -1319,7 +1316,7 @@ console.log('🔗 Pairing code', ':', customPairingCode)
 #### 🖼️ Image Processing
 
 > [!NOTE]
-Automatically use available image processing library: `sharp`, `@napi-rs/image`, or `jimp`
+> Automatically use available image processing library: `sharp`, `@napi-rs/image`, or `jimp`
 
 ```javascript
 import { getImageProcessingLibrary } from '@itsliaaa/baileys'
@@ -1676,8 +1673,15 @@ sock.ev.on('newsletter-settings.update', (update) => {})
 sock.ev.on('settings.update', (update) => {})
 ```
 
+## 🚀 Try the Bot
+
+A fast, lightweight, and modular WhatsApp bot built with [@itsliaaa/baileys](https://www.npmjs.com/package/@itsliaaa/baileys).
+Perfect for managing groups, moderating chats, and adding fun with quiz games and handy tools.
+
+👉🏻 [@itsliaaa/starseed](https://github.com/itsliaaa/starseed#readme)
+
 ## 📦 Fork Base
-> [!NOTE]
+
 This fork is based on [Baileys (GitHub)](https://github.com/WhiskeySockets/Baileys)
 
 ## 📣 Credits
