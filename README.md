@@ -151,6 +151,9 @@ Hi everyone,
    - [🖼️ Image Processing](#%EF%B8%8F-image-processing)
    - [📣 Newsletter Management](#-newsletter-management)
    - [👥 Group Management](#-group-management)
+   - [👤 Profile Management](#-profile-management)
+   - [🔐 Privacy Management](#-privacy-management)
+   - [📡 Events](#-events)
 - [📦 Fork Base](#-fork-base)
 - [📣 Credits](#-credits)
 
@@ -1357,7 +1360,7 @@ else if (lib.jimp?.Jimp) {
 
    output = await img
       .resize({ w: width, mode: lib.jimp.ResizeStrategy.BILINEAR })
-      .getBuffer('image/jpeg', { quality: 50 });
+      .getBuffer('image/jpeg', { quality: 50 })
 }
 
 // --- Fallback
@@ -1373,16 +1376,32 @@ console.dir(output, { depth: null })
 
 ```javascript
 // --- Create a new one
-sock.newsletterCreate('@itsliaaa/baileys')
+sock.newsletterCreate('@itsliaaa/baileys', '📣 Fresh updates weekly')
 
 // --- Get info
-sock.newsletterMetadata('1231111111111@newsletter')
+const metadata = sock.newsletterMetadata('1231111111111@newsletter')
+console.dir(metadata, { depth: null })
+
+// --- Get subscribers count
+const subscribers = await sock.newsletterSubscribers('1231111111111@newsletter')
+console.dir(subscribers, { depth: null })
+
+// --- Follow and Unfollow
+sock.newsletterFollow('1231111111111@newsletter')
+sock.newsletterUnfollow('1231111111111@newsletter')
+
+// --- Mute and Unmute
+sock.newsletterMute('1231111111111@newsletter')
+sock.newsletterUnmute('1231111111111@newsletter')
 
 // --- Demote admin
 sock.newsletterDemote('1231111111111@newsletter', '6281111111111@s.whatsapp.net')
 
 // --- Change owner
 sock.newsletterChangeOwner('1231111111111@newsletter', '6281111111111@s.whatsapp.net')
+
+// --- Update newsletter
+sock.newsletterUpdate('1231111111111@newsletter', { name: '@itsliaaa/baileys' })
 
 // --- Change name
 sock.newsletterUpdateName('1231111111111@newsletter', '📦 @itsliaaa/baileys')
@@ -1401,26 +1420,40 @@ sock.newsletterRemovePicture('1231111111111@newsletter')
 // --- React to a message
 sock.newsletterReactMessage('1231111111111@newsletter', '100', '💛')
 
+// --- Get admin count
+const count = await sock.newsletterAdminCount('1231111111111@newsletter')
+
 // --- Get all subscribed newsletters
 const newsletters = await sock.newsletterSubscribed()
-
 console.dir(newsletters, { depth: null })
+
+// --- Fetch newsletter messages
+const messages = sock.newsletterFetchMessages('jid', '1231111111111@newsletter', 50, 0, 0)
+console.dir(messages, { depth: null })
+
+// --- Delete newsletter
+sock.newsletterDelete('1231111111111@newsletter')
 ```
 
 #### 👥 Group Management
 
 ```javascript
 // --- Create a new one and add participants using their JIDs
-sock.groupCreate('@itsliaaa/baileys', ['628123456789@s.whatsapp.net'])
+const group = sock.groupCreate('@itsliaaa/baileys', ['628123456789@s.whatsapp.net'])
+console.dir(group, { depth: null })
 
 // --- Get info
-sock.groupMetadata(jid)
+const metadata = await sock.groupMetadata(jid)
+console.dir(metadata, { depth: null })
 
-// --- Get invite code
+// --- Get group invite code
 sock.groupInviteCode(jid)
 
 // --- Revoke invite link
 sock.groupRevokeInvite(jid)
+
+// --- Accept group invite
+sock.groupAcceptInvite(inviteCode)
 
 // --- Leave group
 sock.groupLeave(jid)
@@ -1436,6 +1469,9 @@ sock.groupParticipantsUpdate(jid, ['628123456789@s.whatsapp.net'], 'promote')
 
 // --- Demote from admin
 sock.groupParticipantsUpdate(jid, ['628123456789@s.whatsapp.net'], 'demote')
+
+// --- Accept join requests
+sock.groupRequestParticipantsUpdate(jid, ['628123456789@s.whatsapp.net'], 'approve')
 
 // --- Change name
 sock.groupUpdateSubject(jid, '📦 @itsliaaa/baileys')
@@ -1481,21 +1517,163 @@ sock.groupJoinApprovalMode(jid, 'off')
 
 // --- Get all groups metadata
 const groups = await sock.groupFetchAllParticipating()
-
 console.dir(groups, { depth: null })
 
-// --- Get pending invites
-const invites = await sock.groupGetInviteInfo(code)
-
-console.dir(invites, { depth: null })
-
-// --- Accept group invite
-sock.groupAcceptInvite(code)
+// --- Get pending join requests
+const requests = await sock.groupRequestParticipantsList(jid)
+console.dir(requests, { depth: null })
 
 // --- Get group info from link
 const group = await sock.groupGetInviteInfo('https://chat.whatsapp.com/ABC123')
-
 console.log('👥 Got group info from link', ':', group)
+
+// --- Update bot member label
+sock.updateMemberLabel(jid, '@itsliaaa/baileys')
+```
+
+#### 👤 Profile Management
+
+```javascript
+// --- Get user profile picture
+const url = await sock.profilePictureUrl(jid, 'image')
+console.log('🖼️ Got user profile url', url)
+
+// --- Update profile picture
+sock.updateProfilePicture(jid, buffer)
+sock.updateProfilePicture(jid, { url })
+
+// --- Remove profile picture
+sock.removeProfilePicture(jid)
+
+// --- Update profile name
+sock.updateProfileName('My Name')
+
+// --- Update profile status
+sock.updateProfileStatus('Available')
+
+// --- Presence
+sock.sendPresenceUpdate('available', jid)
+sock.presenceSubscribe(jid)
+
+// --- Read receipts
+sock.readMessages([message.key])
+sock.sendReceipt(jid, participant, [messageId], 'read')
+
+// --- Block user
+sock.updateBlockStatus(jid, 'block')
+
+// --- Unblock user
+sock.updateBlockStatus(jid, 'unblock')
+
+// --- Fetch blocklist
+const blocked = await sock.fetchBlocklist()
+console.dir(blocked, { depth: null })
+
+// --- Modify chats
+sock.chatModify({
+   archive: true,
+   lastMessageOrig: message,
+   lastMessage: message
+}, jid)
+
+// --- Star messages
+sock.star(jid, [{ id: messageId, fromMe: true }], true)
+
+// --- Contact
+sock.addOrEditContact(jid, { displayName: 'Starseed' })
+sock.removeContact(jid)
+
+// --- Label
+sock.addChatLabel(jid, labelId)
+sock.removeChatLabel(jid, labelId)
+sock.addMessageLabel(jid, messageId, labelId)
+
+// --- App state sync
+sock.resyncAppState(['regular', 'critical_block'], true)
+
+// --- Get business profile
+const profile = await sock.getBusinessProfile(jid)
+console.dir(profile, { depth: null })
+```
+
+#### 🔐 Privacy Management
+
+```javascript
+// --- Update last seen privacy
+sock.updateLastSeenPrivacy('all')
+sock.updateLastSeenPrivacy('contacts')
+sock.updateLastSeenPrivacy('contact_blacklist')
+sock.updateLastSeenPrivacy('nobody')
+
+// --- Update online privacy
+sock.updateOnlinePrivacy('all')
+sock.updateOnlinePrivacy('match_last_seen')
+
+// --- Update profile picture privacy
+sock.updateProfilePicturePrivacy('contacts')
+
+// --- Update status privacy
+sock.updateStatusPrivacy('contacts')
+
+// --- Update read receipts privacy
+sock.updateReadReceiptsPrivacy('all')
+sock.updateReadReceiptsPrivacy('none')
+
+// --- Update groups add privacy
+sock.updateGroupsAddPrivacy('all')
+sock.updateGroupsAddPrivacy('contacts')
+
+// --- Update messages privacy
+sock.updateMessagesPrivacy('all')
+sock.updateMessagesPrivacy('contacts')
+sock.updateMessagesPrivacy('nobody')
+
+// --- Update call privacy
+sock.updateCallPrivacy('everyone')
+
+// --- Update default disappearing mode
+sock.updateDefaultDisappearingMode(86400)
+
+// --- Update link previews privacy
+sock.updateDisableLinkPreviewsPrivacy(true)
+```
+
+#### 📡 Events
+
+```javascript
+sock.ev.on('connection.update', (update) => {})
+sock.ev.on('creds.update', (update) => {})
+sock.ev.on('messaging-history.set', (update) => {})
+sock.ev.on('messaging-history.status', (update) => {})
+sock.ev.on('chats.upsert', (update) => {})
+sock.ev.on('chats.update', (update) => {})
+sock.ev.on('chats.delete', (update) => {})
+sock.ev.on('chats.lock', (update) => {})
+sock.ev.on('lid-mapping.update', (update) => {})
+sock.ev.on('presence.update', (update) => {})
+sock.ev.on('contacts.upsert', (update) => {})
+sock.ev.on('contacts.update', (update) => {})
+sock.ev.on('messages.delete', (update) => {})
+sock.ev.on('messages.update', (update) => {})
+sock.ev.on('messages.media-update', (update) => {})
+sock.ev.on('messages.upsert', (update) => {})
+sock.ev.on('messages.reaction', (update) => {})
+sock.ev.on('message-receipt.update', (update) => {})
+sock.ev.on('groups.upsert', (update) => {})
+sock.ev.on('groups.update', (update) => {})
+sock.ev.on('group-participants.update', (update) => {})
+sock.ev.on('group.join-request', (update) => {})
+sock.ev.on('group.member-tag.update', (update) => {})
+sock.ev.on('blocklist.set', (update) => {})
+sock.ev.on('blocklist.update', (update) => {})
+sock.ev.on('call', (update) => {})
+sock.ev.on('labels.edit', (update) => {})
+sock.ev.on('labels.association', (update) => {})
+sock.ev.on('newsletter.reaction', (update) => {})
+sock.ev.on('newsletter.view', (update) => {})
+sock.ev.on('newsletter-participants.update', (update) => {})
+sock.ev.on('newsletter-settings.update', (update) => {})
+sock.ev.on('settings.update', (update) => {})
 ```
 
 ## 📦 Fork Base

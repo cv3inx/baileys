@@ -45,7 +45,7 @@
       "fflate": "^0.8.2",
       "libsignal": "github:WhiskeySockets/libsignal-wasm#master",
       "lru-cache": "^11.2.6",
-      "music-metadata": "^11.7.0",
+      "music-metadata": "11.12.1",
       "p-queue": "^9.1.0",
       "pino": "^9.6.0",
       "protobufjs": "^7.5.4",
