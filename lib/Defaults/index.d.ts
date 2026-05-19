@@ -48,6 +48,7 @@ export namespace DEFAULT_CONNECTION_CONFIG {
     export let customUploadHosts: never[];
     export let retryRequestDelayMs: number;
     export let maxMsgRetryCount: number;
+    export let offlineNodeBatchSize: number;
     export let fireInitQueries: boolean;
     export let auth: undefined;
     export let markOnlineOnConnect: boolean;
