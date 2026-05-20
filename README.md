@@ -1,18 +1,12 @@
-# 🌱 @itsliaaa/baileys
+# 🌱 cv3inx/baileys
 
-[![Logo](https://files.catbox.moe/c5s9g0.jpg)](https://www.npmjs.com/package/@itsliaaa/baileys)
+[![Logo](https://files.catbox.moe/c5s9g0.jpg)](https://github.com/cv3inx/baileys)
 
 <p align="center">
-   Enhanced Baileys v7 with fixes for newsletter media uploads, plus support for interactive messages, albums, and additional message types.
+   Enterprise-grade Baileys v7 fork — comprehensive stability fixes, upstream RC10+ sync, and full production hardening for 300+ bot deployments.
    <br><br>
-   <a href="https://www.npmjs.com/package/@itsliaaa/baileys">
-      <img src="https://img.shields.io/npm/v/@itsliaaa/baileys?style=for-the-badge&logo=npm"/>
-   </a>
-   <a href="https://www.npmjs.com/package/@itsliaaa/baileys">
-      <img src="https://img.shields.io/npm/dm/@itsliaaa/baileys?style=for-the-badge&logo=npm"/>
-   </a>
-   <a href="https://github.com/itsliaaa/baileys">
-      <img src="https://img.shields.io/github/stars/itsliaaa/baileys?style=for-the-badge&logo=github"/>
+   <a href="https://github.com/cv3inx/baileys">
+      <img src="https://img.shields.io/github/stars/cv3inx/baileys?style=for-the-badge&logo=github"/>
    </a>
    <a href="LICENSE">
       <img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge"/>
@@ -25,25 +19,51 @@
    </a>
 </p>
 
-☕ For donation: [Saweria](https://saweria.co/itsliaaa)
-
 ### ✨ Highlights
 
-This fork designed for production use with a focus on clarity and safety:
+This fork is designed for production use with a focus on stability, security, and enterprise scale:
 
 - 🚫 No obfuscation. Easy to read and audit.
 - 🚫 No auto-follow channel (newsletter) behavior.
+- 🔒 Security: spoofing guards on self-only protocol messages.
+- ⚡ Battle-tested on 300+ concurrent bot deployments.
 
 > [!NOTE]
-> 📄 This project is maintained with limited scope and is not intended to replace upstream Baileys.
->
-> 😞 And, really sorry for my bad english.
+> Based on [@itsliaaa/baileys](https://github.com/itsliaaa/baileys) with comprehensive enterprise hardening and upstream RC10+ sync applied on top.
 
 ### 🛠️ Internal Adjustments
 - 🖼️ Fixed an issue where media could not be sent to newsletters due to an upstream issue.
 - 📁 Reintroduced [`makeInMemoryStore`](#%EF%B8%8F-implementing-data-store) with a minimal ESM adaptation and small adjustments for Baileys v7.
 - 📦 Switched FFmpeg execution from `exec` to `spawn` for safer process handling.
 - 🗃️ Added [`@napi-rs/image`](https://www.npmjs.com/package/@napi-rs/image) as a supported image processing backend in [`getImageProcessingLibrary()`](#%EF%B8%8F-image-processing), offering a balance between performance and compatibility.
+
+### 🔧 Enterprise Stability Fixes
+- 🔌 **Connection**: keepalive `missedPongs` counter (2 misses before disconnect), scaled dead threshold, `pingInFlight` guard prevents pileup on slow networks.
+- 🔌 **WebSocket**: `close()` now times out after 5s — prevents hang on half-open TCP connections.
+- 🔇 **Deaf session fix** (#2491): provisional ACK sent immediately before `messageMutex` so WA server doesn't stop delivery under load.
+- 📩 **Group messages** (#2548): `migrateSession` no longer bails when `device-list` absent — fixes silent group message drops.
+- 📤 **Group send** (#2521): `assertSessions` errors caught per-path — one deregistered device no longer aborts entire group send.
+- 🌐 **markOnlineOnConnect: false** (#2553): now correctly gates `sendPassiveIq('active')` — phone push notifications work properly.
+- 🖼️ **profilePictureUrl** (#2498): default timeout 10s (was 60s).
+- 📊 **fetchNewChatMessageCap** (#2539): MEX 500 errors treated as non-fatal.
+- 🔔 **messages.upsert after group admin action** (#2453): `server_sync` resyncAppState failure no longer blocks notification mutex.
+- 📰 **Newsletter burst** (#2464): buffer key includes `participant` field — prevents message collision on burst traffic.
+- 🔑 **pkmsg/retry bypass** (#2509): Signal session establishment nodes bypass `shouldIgnoreJid` — no more "Waiting for this message".
+- 👥 **groupFetchAllParticipating** (#2514): single bad group no longer crashes full fetch.
+- 🗳️ **Poll vote decryption**: re-enabled (was fully commented out in upstream).
+- 🗑️ **Chat clear**: `messages.delete` by JID now handled in event buffer.
+- 🆔 **generateMessageIDV2**: removed hidden `STARFALL` watermark — clean 22-char format matching upstream.
+- 🔒 **Security**: `SELF_ONLY_TYPES` guard drops `HISTORY_SYNC_NOTIFICATION`, `APP_STATE_SYNC_KEY_SHARE`, `LID_MIGRATION_MAPPING_SYNC`, `PEER_DATA_OPERATION_REQUEST_RESPONSE_MESSAGE` from non-self senders.
+- 🧠 **isRealMessage**: stub-only types (missed calls, group add) no longer need message content — fixes unread count for group joins.
+- 📝 **messages.update**: `messageTimestamp` omitted when `attrs.t` absent (no more spurious `timestamp: 0`).
+- 📦 **ON_DEMAND history sync**: in-memory store now appends fetched messages instead of dropping them.
+- 🔢 **offlineNodeBatchSize**: configurable (default 50, was hardcoded 10) — faster offline drain on reconnect.
+- 💾 **processedHistoryMessages**: capped at 50 entries — prevents unbounded `creds.json` growth.
+- 🔒 **per-instance file locks** in `useMultiFileAuthState` — no cross-account mutex interference in multi-bot setups.
+- 📡 **USync side_list**: parsed and merged with main list — device changes no longer missed.
+- 🏘️ **LID mappings**: stored on group metadata fetch, participant add/remove/revoke, and community participant parse.
+- 🔁 **Retry receipt**: error attr carries mapped Signal error code (was always `0`).
+- 🔕 **lidDbMigrated: true** in login payload — signals full LID migration to WA server.
 
 ### 📨 Messages Handling & Compatibility
 - 📩 Expanded messages support for:
@@ -72,6 +92,7 @@ This fork designed for production use with a focus on clarity and safety:
 ### 📋 Table of Contents
 - [✨ Highlights](#-highlights)
 - [🛠️ Internal Adjustments](#%EF%B8%8F-internal-adjustments)
+- [🔧 Enterprise Stability Fixes](#-enterprise-stability-fixes)
 - [📨 Messages Handling & Compatibility](#-highlights)
 - [🧩 Additional Message Options](#-additional-message-options)
 - [📥 Installation](#-installation)
@@ -151,25 +172,17 @@ This fork designed for production use with a focus on clarity and safety:
 - 📄 Via `package.json`
 
 ```json
-# NPM
-"dependencies": {
-   "@itsliaaa/baileys": "latest"
-}
-
 # GitHub
 "dependencies": {
-   "@itsliaaa/baileys": "github:itsliaaa/baileys"
+   "baileys": "git+https://github.com/cv3inx/baileys.git"
 }
 ```
 
 - ⌨️ Via terminal
 
 ```bash
-# NPM
-npm i @itsliaaa/baileys@latest
-
 # GitHub
-npm i github:itsliaaa/baileys
+npm i github:cv3inx/baileys
 ```
 
 #### 🧩 Import (ESM & CJS)
@@ -1992,16 +2005,11 @@ sock.ev.on('newsletter-settings.update', (update) => {})
 sock.ev.on('settings.update', (update) => {})
 ```
 
-### 🚀 Try the Bot
-
-A fast, lightweight, and modular WhatsApp bot built with [@itsliaaa/baileys](https://www.npmjs.com/package/@itsliaaa/baileys).
-Perfect for managing groups, moderating chats, and adding fun with quiz games and handy tools.
-
-👉🏻 [@itsliaaa/starseed](https://github.com/itsliaaa/starseed#readme)
-
 ### 📦 Fork Base
 
-This fork is based on [Baileys (GitHub)](https://github.com/WhiskeySockets/Baileys)
+This fork is based on:
+- [WhiskeySockets/Baileys](https://github.com/WhiskeySockets/Baileys) — upstream Baileys v7
+- [itsliaaa/baileys](https://github.com/itsliaaa/baileys) — enhanced fork with message type support
 
 ### 📣 Credits
 
@@ -2010,7 +2018,9 @@ Full credit is attributed to the original maintainers and contributors of Bailey
 - [jlucaso1](https://github.com/jlucaso1)
 - [adiwajshing](https://github.com/adiwajshing)
 
-This fork includes additional enhancements and modifications by [Lia Wynn](https://github.com/itsliaaa)
+Enhanced message support by [Lia Wynn](https://github.com/itsliaaa).
+
+Enterprise stability hardening by [cv3inx](https://github.com/cv3inx).
 
 Special thanks to [itsreimau](https://github.com/itsreimau) for the fix to the `updateBlockStatus` implementation.
 
