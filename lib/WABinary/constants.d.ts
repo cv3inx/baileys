@@ -27,6 +27,11 @@ export const HTML_KEYWORDS: Set<string>;
 export const JS_KEYWORDS: Set<string>;
 export const PYTHON_KEYWORDS: Set<string>;
 export const RUST_KEYWORDS: Set<string>;
+export const C_KEYWORDS: Set<string>;
+export const CSHARP_KEYWORDS: Set<string>;
+export const BASH_KEYWORDS: Set<string>;
+export const CMD_KEYWORDS: Set<string>;
+export const POWERSHELL_KEYWORDS: Set<string>;
 export const LANGUAGE_KEYWORDS: {
     css: Set<string>;
     html: Set<string>;
@@ -42,5 +47,16 @@ export const LANGUAGE_KEYWORDS: {
     'c++': Set<string>;
     rust: Set<string>;
     rs: Set<string>;
+    c: Set<string>;
+    h: Set<string>;
+    csharp: Set<string>;
+    cs: Set<string>;
+    bash: Set<string>;
+    sh: Set<string>;
+    zsh: Set<string>;
+    cmd: Set<string>;
+    bat: Set<string>;
+    powershell: Set<string>;
+    ps1: Set<string>;
 };
 //# sourceMappingURL=constants.d.ts.map
