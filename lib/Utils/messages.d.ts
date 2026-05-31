@@ -24,9 +24,9 @@ export function prepareDisappearingMessageSettingContent(ephemeralExpiration: an
 export function generateForwardMessageContent(message: any, forceForward: any): any;
 export function hasNonNullishProperty(message: any, key: any): boolean;
 export function hasOptionalProperty(obj: any, key: any): boolean;
-export function hasValidAlbumMedia(message: any): any;
-export function hasValidInteractiveHeader(message: any): any;
-export function hasValidCarouselHeader(message: any): any;
+export function hasValidAlbumMedia(message: any): boolean;
+export function hasValidInteractiveHeader(message: any): boolean;
+export function hasValidCarouselHeader(message: any): boolean;
 export function generateWAMessageContent(message: any, options: any): Promise<any>;
 export function generateWAMessageFromContent(jid: any, message: any, options: any): proto.WebMessageInfo;
 export function generateWAMessage(jid: any, content: any, options: any): Promise<proto.WebMessageInfo>;
@@ -41,6 +41,6 @@ export function updateMessageWithEventResponse(msg: any, update: any): void;
 export function aggregateMessageKeysNotFromMe(keys: any): any[];
 export function downloadMediaMessage(message: any, type: any, options: any, ctx: any): Promise<any>;
 export function assertMediaContent(content: any): any;
-export function shouldIncludeBizBinaryNode(message: any): any;
+export function shouldIncludeBizBinaryNode(message: any): boolean;
 import { proto } from '../../WAProto/index.js';
 //# sourceMappingURL=messages.d.ts.map
