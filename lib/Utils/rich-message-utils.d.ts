@@ -2,7 +2,7 @@ export function tokenizeCode(code: any, language?: string): {
     highlightType: any;
     codeContent: string | undefined;
 }[];
-export function toUnified(submessages: any): {
+export function toUnified(submessages: any, uuid: any): {
     response_id: any;
     sections: any;
 };
