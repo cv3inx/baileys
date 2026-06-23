@@ -3,7 +3,7 @@
 [![Logo](https://files.catbox.moe/c5s9g0.jpg)](https://github.com/cv3inx/baileys)
 
 <p align="center">
-   Enterprise-grade Baileys v7 fork — comprehensive stability fixes, upstream RC10+ sync, and full production hardening for 300+ bot deployments.
+   Enterprise-grade Baileys v7 fork — stability fixes, upstream sync, and production hardening for 300+ bot deployments.
    <br><br>
    <a href="https://github.com/cv3inx/baileys">
       <img src="https://img.shields.io/github/stars/cv3inx/baileys?style=for-the-badge&logo=github"/>
@@ -19,183 +19,105 @@
    </a>
 </p>
 
-### ✨ Highlights
-
-This fork is designed for production use with a focus on stability, security, and enterprise scale:
-
-- 🚫 No obfuscation. Easy to read and audit.
-- 🚫 No auto-follow channel (newsletter) behavior.
-- 🔒 Security: spoofing guards on self-only protocol messages.
-- ⚡ Battle-tested on 300+ concurrent bot deployments.
+A WhatsApp Web library fork focused on stability, security, and extra message-type support. No obfuscation — easy to read and audit.
 
 > [!NOTE]
-> Based on [@itsliaaa/baileys](https://github.com/itsliaaa/baileys) with comprehensive enterprise hardening and upstream RC10+ sync applied on top.
+> Based on [@itsliaaa/baileys](https://github.com/itsliaaa/baileys) with enterprise hardening and upstream sync applied on top.
 
-### 🛠️ Internal Adjustments
-- 🖼️ Fixed an issue where media could not be sent to newsletters due to an upstream issue.
-- 📁 Reintroduced [`makeInMemoryStore`](#%EF%B8%8F-implementing-data-store) with a minimal ESM adaptation and small adjustments for Baileys v7.
-- 📦 Switched FFmpeg execution from `exec` to `spawn` for safer process handling.
-- 🗃️ Added [`@napi-rs/image`](https://www.npmjs.com/package/@napi-rs/image) as a supported image processing backend in [`getImageProcessingLibrary()`](#%EF%B8%8F-image-processing), offering a balance between performance and compatibility.
+---
 
-### 🔧 Enterprise Stability Fixes
-- 🔌 **Connection**: keepalive `missedPongs` counter (2 misses before disconnect), scaled dead threshold, `pingInFlight` guard prevents pileup on slow networks.
-- 🔌 **WebSocket**: `close()` now times out after 5s — prevents hang on half-open TCP connections.
-- 🔇 **Deaf session fix** (#2491): provisional ACK sent immediately before `messageMutex` so WA server doesn't stop delivery under load.
-- 📩 **Group messages** (#2548): `migrateSession` no longer bails when `device-list` absent — fixes silent group message drops.
-- 📤 **Group send** (#2521): `assertSessions` errors caught per-path — one deregistered device no longer aborts entire group send.
-- 🌐 **markOnlineOnConnect: false** (#2553): now correctly gates `sendPassiveIq('active')` — phone push notifications work properly.
-- 🖼️ **profilePictureUrl** (#2498): default timeout 10s (was 60s).
-- 📊 **fetchNewChatMessageCap** (#2539): MEX 500 errors treated as non-fatal.
-- 🔔 **messages.upsert after group admin action** (#2453): `server_sync` resyncAppState failure no longer blocks notification mutex.
-- 📰 **Newsletter burst** (#2464): buffer key includes `participant` field — prevents message collision on burst traffic.
-- 🔑 **pkmsg/retry bypass** (#2509): Signal session establishment nodes bypass `shouldIgnoreJid` — no more "Waiting for this message".
-- 👥 **groupFetchAllParticipating** (#2514): single bad group no longer crashes full fetch.
-- 🗳️ **Poll vote decryption**: re-enabled (was fully commented out in upstream).
-- 🗑️ **Chat clear**: `messages.delete` by JID now handled in event buffer.
-- 🆔 **generateMessageIDV2**: removed hidden `STARFALL` watermark — clean 22-char format matching upstream.
-- 🔒 **Security**: `SELF_ONLY_TYPES` guard drops `HISTORY_SYNC_NOTIFICATION`, `APP_STATE_SYNC_KEY_SHARE`, `LID_MIGRATION_MAPPING_SYNC`, `PEER_DATA_OPERATION_REQUEST_RESPONSE_MESSAGE` from non-self senders.
-- 🧠 **isRealMessage**: stub-only types (missed calls, group add) no longer need message content — fixes unread count for group joins.
-- 📝 **messages.update**: `messageTimestamp` omitted when `attrs.t` absent (no more spurious `timestamp: 0`).
-- 📦 **ON_DEMAND history sync**: in-memory store now appends fetched messages instead of dropping them.
-- 🔢 **offlineNodeBatchSize**: configurable (default 50, was hardcoded 10) — faster offline drain on reconnect.
-- 💾 **processedHistoryMessages**: capped at 50 entries — prevents unbounded `creds.json` growth.
-- 🔒 **per-instance file locks** in `useMultiFileAuthState` — no cross-account mutex interference in multi-bot setups.
-- 📡 **USync side_list**: parsed and merged with main list — device changes no longer missed.
-- 🏘️ **LID mappings**: stored on group metadata fetch, participant add/remove/revoke, and community participant parse.
-- 🔁 **Retry receipt**: error attr carries mapped Signal error code (was always `0`).
-- 🔕 **lidDbMigrated: true** in login payload — signals full LID migration to WA server.
-
-### 📨 Messages Handling & Compatibility
-- 📩 Expanded messages support for:
-   - 🖼️ [Album Message](#%EF%B8%8F-album-image--video)
-   - 👤 [Group Status Message](#%E2%80%8D%E2%80%8D-group-status)
-   - 👉🏻 [Interactive Message](#-sending-interactive-messages) (buttons, lists, native flows, templates, carousels).
-   - 🎞️ [Status Mention Message](#%EF%B8%8F-status-mention)
-   - 📦 [Sticker Pack Message](#-sticker-pack)
-   - ✨ [Rich Response Message](#-rich-response) **[NEW]**
-   - 🧾 [Message with Code Blocks](#-message-with-code-block) **[NEW]**
-   - [🌏 Message with Inline Entities](#-message-with-inline-entities) **[NEW]**
-   - 📋 [Message with Table](#-message-with-table) **[NEW]**
-   - 💳 [Payment-related Message](#-sending-payment-messages) (payment requests, invites, orders, invoices).
-- 📰 Simplified sending messages with ad thumbnail using [`externalAdReply`](#-external-ad-reply), without requiring manual `contextInfo`.
-- 💭 Added support for quoting messages inside channel (newsletter). **[NEW]**
-- 🎀 Added support for [custom button icon](#%EF%B8%8F-interactive). **[NEW]**
-
-### 🧩 Additional Message Options
-- 👁️ Added optional boolean flags for message handling:  
-   - 🤖 [`ai`](#-ai-icon) - AI icon on message
-   - 📣 [`mentionAll`](#-mention) - Mention all group participants without requiring their JIDs in `mentions` or `mentionedJid` **[NEW]**
-   - 🔧 [`ephemeral`](#-ephemeral), [`groupStatus`](#%E2%80%8D%E2%80%8D-group-status), [`isLottie`](#-lottie-sticker), [`spoiler`](#-spoiler), [`viewOnce`](#%EF%B8%8F-view-once), [`viewOnceV2`](#%EF%B8%8F-view-once-v2), [`viewOnceV2Extension`](#%EF%B8%8F-view-once-v2-extension), [`interactiveAsTemplate`](#%EF%B8%8F-interactive) - Message wrappers
-   - 🔒 [`secureMetaServiceLabel`](#%EF%B8%8F-secure-meta-service-label) - Secure meta service label on message **[NEW]**
-   - 📄 [`raw`](#-raw) - Build your message manually **(DO NOT USE FOR EXPLOITATION)**
-
-### 📋 Table of Contents
-- [✨ Highlights](#-highlights)
-- [🛠️ Internal Adjustments](#%EF%B8%8F-internal-adjustments)
-- [🔧 Enterprise Stability Fixes](#-enterprise-stability-fixes)
-- [📨 Messages Handling & Compatibility](#-highlights)
-- [🧩 Additional Message Options](#-additional-message-options)
-- [📥 Installation](#-installation)
-   - [🧩 Import (ESM & CJS)](#-import-esm--cjs)
-- [🌐 Connect to WhatsApp (Quick Step)](#-connect-to-whatsapp-quick-step)
-   - [🔐 Auth State](#-auth-state)
-- [🗄️ Implementing Data Store](#%EF%B8%8F-implementing-data-store)
-- [🪪 WhatsApp IDs Explain](#-whatsapp-ids-explain)
-- [✉️ Sending Messages](#%EF%B8%8F-sending-messages)
-   - [🔠 Text](#-text)
-   - [🔔 Mention](#-mention)
-   - [😁 Reaction](#-reaction)
-   - [📌 Pin Message](#-pin-message)
-   - [➡️ Forward Message](#%EF%B8%8F-forward-message)
-   - [👤 Contact](#-contact)
-   - [📍 Location](#-location)
-   - [🗓️ Event](#%EF%B8%8F-event)
-   - [👥 Group Invite](#-group-invite)
-   - [🛍️ Product](#%EF%B8%8F-product)
-   - [📊 Poll](#-poll)
-   - [💭 Button Response](#-button-response)
-   - [✨ Rich Response](#-rich-response)
-   - [🧾 Message with Code Block](#-message-with-code-block)
-   - [🌏 Message with Inline Entities](#-message-with-inline-entities)
-   - [📋 Message with Table](#-message-with-table)
-   - [🎞️ Status Mention](#%EF%B8%8F-status-mention)
-- [📁 Sending Media Messages](#-sending-media-messages)
-   - [🖼️ Image](#%EF%B8%8F-image)
-   - [🎥 Video](#-video)
-   - [📃 Sticker](#-sticker)
-   - [💽 Audio](#-audio)
-   - [🗂️ Document](#%EF%B8%8F-document)
-   - [🖼️ Album (Image & Video)](#%EF%B8%8F-album-image--video)
-   - [📦 Sticker Pack](#-sticker-pack)
-- [👉🏻 Sending Interactive Messages](#-sending-interactive-messages)
-   - [🔘 Buttons](#-buttons)
-   - [📋 List](#-list)
-   - [🗄️ Interactive](#%EF%B8%8F-interactive)
-   - [🫙 Hydrated Template](#-hydrated-template)
-- [💳 Sending Payment Messages](#-sending-payment-messages)
-   - [➕ Invite Payment](#-invite-payment)
-   - [🧾 Invoice](#-invoice)
-   - [🛍️ Order](#%EF%B8%8F-order)
-   - [💳 Request Payment](#-request-payment)
-- [👁️ Other Message Options](#%EF%B8%8F-other-message-options)
-   - [🤖 AI Icon](#-ai-icon)
-   - [🕒 Ephemeral](#-ephemeral)
-   - [📰 External Ad Reply](#-external-ad-reply)
-   - [🧑‍🧑‍🧒 Group Status](#%E2%80%8D%E2%80%8D-group-status)
-   - [🐱 Lottie Sticker](#-lottie-sticker)
-   - [🧩 Raw](#-raw)
-   - [🏷️ Secure Meta Service Label](#%EF%B8%8F-secure-meta-service-label)
-   - [📑 Spoiler](#-spoiler)
-   - [👁️ View Once](#%EF%B8%8F-view-once)
-   - [👁️ View Once V2](#%EF%B8%8F-view-once-v2)
-   - [👁️ View Once V2 Extension](#%EF%B8%8F-view-once-v2-extension)
-- [♻️ Modify Messages](#%EF%B8%8F-modify-messages)
-   - [🗑️ Delete Messages](#%EF%B8%8F-delete-messages)
-   - [✏️ Edit Messages](#%EF%B8%8F-edit-messages)
-- [🧰 Additional Contents](#-additional-contents)
-   - [🏷️ Find User ID (JID|PN/LID)](#%EF%B8%8F-find-user-id-jidpnlid)
-   - [🔑 Request Custom Pairing Code](#-request-custom-pairing-code)
-   - [🖼️ Image Processing](#%EF%B8%8F-image-processing)
-   - [📣 Newsletter Management](#-newsletter-management)
-   - [👥 Group Management](#-group-management)
-   - [👥 Community Management](#-community-management)
-   - [👤 Profile Management](#-profile-management)
-   - [🛒 Business Management](#-business-management)
-   - [🔐 Privacy Management](#-privacy-management)
-   - [📡 Events](#-events)
-- [🚀 Try the Bot](#-try-the-bot)
-- [📦 Fork Base](#-fork-base)
-- [📣 Credits](#-credits)
-
-### 📥 Installation
-
-- 📄 Via `package.json`
-
-```json
-# GitHub
-"dependencies": {
-   "baileys": "git+https://github.com/cv3inx/baileys.git"
-}
-```
-
-- ⌨️ Via terminal
+## 📦 Installation
 
 ```bash
-# GitHub
-npm i github:cv3inx/baileys
+npm install @itsliaaa/baileys
 ```
 
-#### 🧩 Import (ESM & CJS)
+```js
+// ESM
+import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@itsliaaa/baileys'
 
-```javascript
-// --- ESM
-import { makeWASocket } from '@itsliaaa/baileys'
-
-// --- CJS (tested and working on Node.js 24 ✅)
-const { makeWASocket } = require('@itsliaaa/baileys')
+// CJS
+const { makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@itsliaaa/baileys')
 ```
 
-### 🌐 Connect to WhatsApp (Quick Step)
+## 🚀 Quick Start
+
+```js
+import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@itsliaaa/baileys'
+import { Boom } from '@hapi/boom'
+
+const { state, saveCreds } = await useMultiFileAuthState('auth')
+
+const sock = makeWASocket({ auth: state, printQRInTerminal: true })
+
+sock.ev.on('creds.update', saveCreds)
+
+sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
+  if (connection === 'close') {
+    const reconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
+    if (reconnect) makeWASocket({ auth: state })
+  }
+})
+
+sock.ev.on('messages.upsert', async ({ messages }) => {
+  const msg = messages[0]
+  if (!msg.key.fromMe && msg.message?.conversation) {
+    await sock.sendMessage(msg.key.remoteJid, { text: 'pong' })
+  }
+})
+```
+
+---
+
+## 🆕 What's New in This Fork
+
+### 👁️ Reveal View-Once — `sock.rvo()`
+Download a view-once message and resend it as normal media. Works for image, video, audio, document, and sticker. Downloads + re-uploads, so it stays valid even after the original was opened.
+
+```js
+sock.ev.on('messages.upsert', async ({ messages }) => {
+  for (const m of messages) {
+    const vo = m.message?.viewOnceMessage
+      || m.message?.viewOnceMessageV2
+      || m.message?.viewOnceMessageV2Extension
+    if (vo) {
+      await sock.rvo(m)              // resend to the original chat
+      // await sock.rvo(m, jid)      // or to another jid
+    }
+  }
+})
+```
+
+### 📱 Android Browser (receive view-once)
+Connect as an Android client to receive view-once messages.
+
+```js
+import { makeWASocket, Browsers } from '@itsliaaa/baileys'
+
+const sock = makeWASocket({ auth: state, browser: Browsers.android('Chrome') })
+```
+
+### ✏️ Secret Encrypted Message Edits
+Decrypts WhatsApp's E2EE message-edit envelope (May 2026+) automatically — edited messages arrive decrypted via the normal `protocolMessage.editedMessage` path.
+
+### 🔑 Caller-Supplied `messageSecret`
+Pass your own 32-byte `messageSecret` on any message type.
+
+```js
+await sock.sendMessage(jid, { text: 'hi' }, { messageSecret: my32Bytes })
+```
+
+### 🤖 `BotAvatarMetadata` Proto
+Added the `BotAvatarMetadata` message (sentiment / behaviorGraph / action / intensity / wordCount), wired into `BotMetadata.avatarMetadata`.
+
+---
+
+## 📚 Usage
+
+_Click a section to expand._
+
+<details>
+<summary><b>🌐 Connect to WhatsApp (Quick Step)</b></summary>
 
 ```javascript
 import { makeWASocket, delay, DisconnectReason, useMultiFileAuthState } from '@itsliaaa/baileys'
@@ -256,7 +178,10 @@ connectToWhatsApp()
 > [!NOTE]
 > You can use the experimental `useSingleFileAuthState` as an alternative to `useMultiFileAuthState`. However, `useSingleFileAuthState` already includes an internal caching mechanism, so there is no need to wrap `state.keys` with `makeCacheableSignalKeyStore`.
 
-### 🗄️ Implementing Data Store
+</details>
+
+<details>
+<summary><b>🗄️ Implementing Data Store</b></summary>
 
 > [!CAUTION]
 > I highly recommend building your own data store, as keeping an entire chat history in memory can lead to excessive RAM usage.
@@ -329,7 +254,10 @@ const connectToWhatsApp = async () => {
 connectToWhatsApp()
 ```
 
-### 🪪 WhatsApp IDs Explain
+</details>
+
+<details>
+<summary><b>🪪 WhatsApp IDs Explain</b></summary>
 
 `id` is the WhatsApp ID, called `jid` and `lid` too, of the person or group you're sending the message to.
 - It must be in the format `[country code][phone number]@s.whatsapp.net`
@@ -339,7 +267,10 @@ connectToWhatsApp()
 - For broadcast lists, it's `[timestamp of creation]@broadcast`.
 - For stories, the ID is `status@broadcast`.
 
-### ✉️ Sending Messages
+</details>
+
+<details>
+<summary><b>✉️ Sending Messages</b></summary>
 
 > [!NOTE]
 > You can get the `jid` from `message.key.remoteJid` in the first example.
@@ -811,7 +742,10 @@ sock.sendMessage([jidA, jidB, jidC], {
 })
 ```
 
-### 📁 Sending Media Messages
+</details>
+
+<details>
+<summary><b>📁 Sending Media Messages</b></summary>
 
 > [!NOTE]
 > For media messages, you can pass a `Buffer` directly, or an object with either `{ stream: Readable }` or `{ url: string }` (local file path or HTTP/HTTPS URL).
@@ -944,7 +878,10 @@ sock.sendMessage(jid, {
 })
 ```
 
-### 👉🏻 Sending Interactive Messages
+</details>
+
+<details>
+<summary><b>👉🏻 Sending Interactive Messages</b></summary>
 
 #### 🔘 Buttons
 
@@ -1184,7 +1121,10 @@ sock.sendMessage(jid, {
 })
 ```
 
-### 💳 Sending Payment Messages
+</details>
+
+<details>
+<summary><b>💳 Sending Payment Messages</b></summary>
 
 #### ➕ Invite Payment
 
@@ -1228,7 +1168,10 @@ sock.sendMessage(jid, {
 })
 ```
 
-### 👁️ Other Message Options
+</details>
+
+<details>
+<summary><b>👁️ Other Message Options</b></summary>
 
 #### 🤖 AI Icon
 
@@ -1402,7 +1345,10 @@ sock.sendMessage(jid, {
 })
 ```
 
-### ♻️ Modify Messages
+</details>
+
+<details>
+<summary><b>♻️ Modify Messages</b></summary>
 
 #### 🗑️ Delete Messages
 
@@ -1428,7 +1374,10 @@ sock.sendMessage(jid, {
 })
 ```
 
-### 🧰 Additional Contents
+</details>
+
+<details>
+<summary><b>🧰 Additional Contents</b></summary>
 
 #### 🏷️ Find User ID (JID|PN/LID)
 
@@ -2005,13 +1954,29 @@ sock.ev.on('newsletter-settings.update', (update) => {})
 sock.ev.on('settings.update', (update) => {})
 ```
 
-### 📦 Fork Base
+</details>
+---
 
-This fork is based on:
+## 🛠️ Fork Highlights
+
+- 🔒 Spoofing guards on self-only protocol messages
+- 🖼️ Fixed media uploads to newsletters (upstream bug)
+- 📁 Reintroduced `makeInMemoryStore` (ESM, Baileys v7)
+- 📦 FFmpeg via `spawn` instead of `exec`
+- 🗃️ `@napi-rs/image` as an image-processing backend
+- 💭 Quote messages inside channels (newsletter)
+- 🎀 Custom button icons + interactive message extras
+- 📣 `mentionAll`, `ai`, `ephemeral`, `viewOnce`, `spoiler`, and other message-wrapper flags
+- ⚡ Battle-tested on 300+ concurrent bot deployments
+
+---
+
+## 📦 Fork Base
+
 - [WhiskeySockets/Baileys](https://github.com/WhiskeySockets/Baileys) — upstream Baileys v7
 - [itsliaaa/baileys](https://github.com/itsliaaa/baileys) — enhanced fork with message type support
 
-### 📣 Credits
+## 📣 Credits
 
 Full credit is attributed to the original maintainers and contributors of Baileys:
 - [purpshell](https://github.com/purpshell)

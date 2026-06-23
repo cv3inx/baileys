@@ -61,6 +61,7 @@ export function decryptMessageEdit({ encPayload, encIv }: {
     editorJid: any;
 }): proto.Message;
 export function cleanMessage(message: any, meId: any, meLid: any): void;
+export function decryptSecretEncryptedMessage(message: any, messageSecret: any, meId: any, meLid: any, logger?: any): Promise<void>;
 export function isRealMessage(message: any): boolean;
 export function shouldIncrementChatUnread(message: any): boolean;
 export function getChatId({ remoteJid, participant, fromMe }: {

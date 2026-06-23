@@ -44,6 +44,7 @@ export function makeMessagesSocket(config: any): {
     messageRetryManager: MessageRetryManager | null;
     updateMemberLabel: (jid: any, memberLabel: any) => Promise<any>;
     updateMediaMessage: (message: any) => Promise<any>;
+    rvo: (message: any, jid?: any, options?: {}) => Promise<proto.WebMessageInfo>;
     sendMessage: (jid: any, content: any, options?: {}) => Promise<proto.WebMessageInfo | undefined>;
     executeWMexQuery: (variables: any, queryId: any, dataPath: any) => Promise<any>;
     newsletterCreate: (name: any, description: any) => Promise<{

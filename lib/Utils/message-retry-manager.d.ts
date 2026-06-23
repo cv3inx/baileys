@@ -25,6 +25,7 @@ export class MessageRetryManager {
      * Get a recent message from the cache
      */
     getRecentMessage(to: any, id: any): any;
+    getRecentMessageById(id: any): any;
     /**
      * Check if a session should be recreated based on retry count, history, and error code.
      * MAC errors (codes 4 and 7) trigger immediate session recreation regardless of timeout.

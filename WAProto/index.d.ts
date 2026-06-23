@@ -1709,6 +1709,7 @@ export namespace proto {
     }
 
     interface IBotMetadata {
+        avatarMetadata?: (proto.IBotAvatarMetadata|null);
         personaId?: (string|null);
         pluginMetadata?: (proto.IBotPluginMetadata|null);
         suggestedPromptMetadata?: (proto.IBotSuggestedPromptMetadata|null);
@@ -1755,6 +1756,7 @@ export namespace proto {
 
     class BotMetadata implements IBotMetadata {
         constructor(p?: proto.IBotMetadata);
+        public avatarMetadata?: (proto.IBotAvatarMetadata|null);
         public personaId?: (string|null);
         public pluginMetadata?: (proto.IBotPluginMetadata|null);
         public suggestedPromptMetadata?: (proto.IBotSuggestedPromptMetadata|null);
@@ -1802,6 +1804,30 @@ export namespace proto {
         public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): proto.BotMetadata;
         public static fromObject(d: { [k: string]: any }): proto.BotMetadata;
         public static toObject(m: proto.BotMetadata, o?: $protobuf.IConversionOptions): { [k: string]: any };
+        public toJSON(): { [k: string]: any };
+        public static getTypeUrl(typeUrlPrefix?: string): string;
+    }
+
+    interface IBotAvatarMetadata {
+        sentiment?: (number|null);
+        behaviorGraph?: (string|null);
+        action?: (number|null);
+        intensity?: (number|null);
+        wordCount?: (number|null);
+    }
+
+    class BotAvatarMetadata implements IBotAvatarMetadata {
+        constructor(p?: proto.IBotAvatarMetadata);
+        public sentiment?: (number|null);
+        public behaviorGraph?: (string|null);
+        public action?: (number|null);
+        public intensity?: (number|null);
+        public wordCount?: (number|null);
+        public static create(properties?: proto.IBotAvatarMetadata): proto.BotAvatarMetadata;
+        public static encode(m: proto.IBotAvatarMetadata, w?: $protobuf.Writer): $protobuf.Writer;
+        public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): proto.BotAvatarMetadata;
+        public static fromObject(d: { [k: string]: any }): proto.BotAvatarMetadata;
+        public static toObject(m: proto.BotAvatarMetadata, o?: $protobuf.IConversionOptions): { [k: string]: any };
         public toJSON(): { [k: string]: any };
         public static getTypeUrl(typeUrlPrefix?: string): string;
     }
