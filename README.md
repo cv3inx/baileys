@@ -21,6 +21,9 @@
 
 A WhatsApp Web library fork focused on stability, security, and extra message-type support. No obfuscation — easy to read and audit.
 
+> [!IMPORTANT]
+> Battle-tested in production at [violetics.pw](https://violetics.pw) — running **dozens of bots inside a single Node.js process** (multi-socket, one runtime).
+
 > [!NOTE]
 > Based on [@itsliaaa/baileys](https://github.com/itsliaaa/baileys) with enterprise hardening and upstream sync applied on top.
 
