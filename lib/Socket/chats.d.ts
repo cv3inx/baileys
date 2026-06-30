@@ -1,3 +1,10 @@
+export function buildProfilePictureQueryContent(type: any, tcTokenContent: any): {
+    tag: string;
+    attrs: {
+        type: any;
+        query: string;
+    };
+}[];
 export function makeChatsSocket(config: any): {
     findUserId: (pnLid: any) => Promise<{
         lid: undefined;
@@ -33,7 +40,7 @@ export function makeChatsSocket(config: any): {
     appPatch: (patchCreate: any) => Promise<void>;
     sendPresenceUpdate: (type: any, toJid: any) => Promise<void>;
     presenceSubscribe: (toJid: any) => Promise<void>;
-    profilePictureUrl: (jid: any, type: string | undefined, timeoutMs: any) => Promise<any>;
+    profilePictureUrl: (jid: any, type?: string, timeoutMs?: number, shouldIncludeTcToken?: boolean) => Promise<any>;
     fetchBlocklist: () => Promise<any>;
     fetchStatus: (...jids: any[]) => Promise<any>;
     fetchDisappearingDuration: (...jids: any[]) => Promise<any>;
