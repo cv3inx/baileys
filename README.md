@@ -113,6 +113,32 @@ await sock.sendMessage(jid, { text: 'hi' }, { messageSecret: my32Bytes })
 ### 🤖 `BotAvatarMetadata` Proto
 Added the `BotAvatarMetadata` message (sentiment / behaviorGraph / action / intensity / wordCount), wired into `BotMetadata.avatarMetadata`.
 
+### 🔐 Passkey Pairing (Shortcake / CRSC)
+Handles WhatsApp's passkey-locked device-linking flow that started rolling out mid-2026 (upstream [#2672](https://github.com/WhiskeySockets/Baileys/issues/2672), ported from whatsmeow `b572e5bc`). On affected accounts the server pushes a `passkey_prologue_request` after QR/pair-code registration instead of completing the link; this handles the full `md` IQ handshake, ADV-secret rotation, handoff proof, and verification-code derivation.
+
+**Limitation — no headless bypass.** The WebAuthn assertion (`navigator.credentials.get()`, `rpId: "whatsapp.com"`, `userVerification: "required"`) can *not* be produced by the library. The server verifies the signature against the account's registered passkey, so you must run the ceremony in a real `web.whatsapp.com` context (e.g. a browser extension) and feed the result back. Accounts not in the passkey bucket link normally and never hit this flow.
+
+```js
+sock.ev.on('pair-passkey.request', async ({ publicKey }) => {
+  // publicKey = WebAuthn PublicKeyCredentialRequestOptions (JSON)
+  // run navigator.credentials.get({ publicKey }) in a web.whatsapp.com tab,
+  // then hand back credential.toJSON():
+  await sock.sendPasskeyResponse(webAuthnResponse)
+})
+
+sock.ev.on('pair-passkey.confirmation', async ({ code, skipHandoffUX }) => {
+  // skipHandoffUX === true  → already auto-confirmed, nothing to do
+  // otherwise show `code`, let the user match it on their phone, then:
+  await sock.sendPasskeyConfirmation()
+})
+
+sock.ev.on('pair-passkey.error', ({ error, continuation }) => {
+  console.error('passkey pairing failed', error)
+})
+```
+
+Also skips empty `link_code_companion_reg` notices that would otherwise throw `Invalid buffer` on passkey/link-code flows (upstream [#2681](https://github.com/WhiskeySockets/Baileys/pull/2681)).
+
 ---
 
 ## 📚 Usage
@@ -1962,6 +1988,7 @@ sock.ev.on('settings.update', (update) => {})
 
 ## 🛠️ Fork Highlights
 
+- 🔐 Passkey (Shortcake/CRSC) device-linking flow
 - 🔒 Spoofing guards on self-only protocol messages
 - 🖼️ Fixed media uploads to newsletters (upstream bug)
 - 📁 Reintroduced `makeInMemoryStore` (ESM, Baileys v7)

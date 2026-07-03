@@ -5,6 +5,8 @@ export function makeMessagesRecvSocket(config: any): {
     fetchMessageHistory: (count: any, oldestMsgKey: any, oldestMsgTimestamp: any) => Promise<any>;
     requestPlaceholderResend: (messageKey: any, msgData: any) => Promise<any>;
     messageRetryManager: import("../Utils/message-retry-manager.js").MessageRetryManager | null;
+    sendPasskeyResponse: (webAuthnResponse: import("../Utils/passkey-utils.js").WebAuthnResponse) => Promise<void>;
+    sendPasskeyConfirmation: () => Promise<void>;
     userDevicesCache: any;
     devicesMutex: {
         mutex(code: any): any;
