@@ -139,6 +139,25 @@ sock.ev.on('pair-passkey.error', ({ error, continuation }) => {
 
 Also skips empty `link_code_companion_reg` notices that would otherwise throw `Invalid buffer` on passkey/link-code flows (upstream [#2681](https://github.com/WhiskeySockets/Baileys/pull/2681)).
 
+### 📞 Full Call Signalling
+The `call` event now covers WhatsApp's complete VoIP signalling surface (ported from [baron-baileys-v2](https://github.com/7ucg/baron-baileys-v2)). Beyond `offer` / `accept` / `reject` / `timeout` / `terminate`, the event also carries:
+
+- **Detailed terminate reasons** — `reject_do_not_disturb`, `mic_permission_denied`, `camera_permission_denied`, `remote_busy`, `remote_offline`
+- **Signalling states** — `preaccept`, `accept_ack`, `peer_state`, `group_info`, `video_state` (+`enabled`), `video_state_ack`, `flow_control`, `enc_rekey`, `mute` (+`muted`), `waiting_room_request` (+`peerJid`)
+- **`call.callKey`** — SRTP session key, Signal-decrypted from the offer's `<enc>` child
+- **`call.audioCodec` / `call.videoCodec`** — negotiated codecs from the offer
+- **Numeric `<signal type="N"/>`** stanzas mapped to the statuses above
+
+Handles both wrapped `<call>` stanzas and the top-level signalling stanzas some accounts receive instead, and acks every one so WhatsApp stops redelivering.
+
+```js
+sock.ev.on('call', ([call]) => {
+  if (call.status === 'offer') console.log('incoming', call.isVideo ? 'video' : 'voice', 'from', call.from)
+  if (call.status === 'mute') console.log('peer muted:', call.muted)
+  if (call.status === 'reject_do_not_disturb') console.log('rejected — DND')
+})
+```
+
 ---
 
 ## 📚 Usage
@@ -1989,6 +2008,7 @@ sock.ev.on('settings.update', (update) => {})
 ## 🛠️ Fork Highlights
 
 - 🔐 Passkey (Shortcake/CRSC) device-linking flow
+- 📞 Full VoIP call signalling (callKey, mute, waiting room, detailed reasons)
 - 🔒 Spoofing guards on self-only protocol messages
 - 🖼️ Fixed media uploads to newsletters (upstream bug)
 - 📁 Reintroduced `makeInMemoryStore` (ESM, Baileys v7)

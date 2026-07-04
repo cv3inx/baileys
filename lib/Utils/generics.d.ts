@@ -59,6 +59,7 @@ export function getCallStatusFromNode({ tag, attrs }: {
     tag: any;
     attrs: any;
 }): string;
+export const CALL_ENDED_STATUSES: Set<string>;
 export function getCodeFromWSError(error: any): number;
 export function isWABusinessPlatform(platform: any): boolean;
 //# sourceMappingURL=generics.d.ts.map
