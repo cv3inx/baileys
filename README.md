@@ -118,6 +118,25 @@ Handles WhatsApp's passkey-locked device-linking flow that started rolling out m
 
 **Limitation — no headless bypass.** The WebAuthn assertion (`navigator.credentials.get()`, `rpId: "whatsapp.com"`, `userVerification: "required"`) can *not* be produced by the library. The server verifies the signature against the account's registered passkey, so you must run the ceremony in a real `web.whatsapp.com` context (e.g. a browser extension) and feed the result back. Accounts not in the passkey bucket link normally and never hit this flow.
 
+**Practical workaround — browser-auth bridge.** Instead of generating an assertion, reuse a session the browser *already* authenticated (the browser clears the passkey at login). Log into WhatsApp Web once, extract the companion session, and import it as Baileys creds — no fresh pairing, no passkey prompt on the Baileys side. Ported from upstream [#2676](https://github.com/WhiskeySockets/Baileys/pull/2676).
+
+```js
+import { extractWhatsAppWebAuthFromBrowser, writeBrowserAuthToMultiFile, useMultiFileAuthState, makeWASocket } from '@itsliaaa/baileys'
+
+// 1. In a logged-in web.whatsapp.com tab (Puppeteer/Playwright page.evaluate, or DevTools console):
+const extract = await page.evaluate(extractWhatsAppWebAuthFromBrowser) // returns BrowserAuthExtract JSON
+
+// 2. In Node — turn it into a Baileys auth folder:
+await writeBrowserAuthToMultiFile('./auth/session-1', extract, { name: 'My Bot' })
+
+// 3. Connect as usual:
+const { state, saveCreds } = await useMultiFileAuthState('./auth/session-1')
+const sock = makeWASocket({ auth: state })
+sock.ev.on('creds.update', saveCreds)
+```
+
+`makeBrowserAuthImport(extract, opts)` returns `{ creds, keys }` directly if you manage auth state yourself. **Caveats:** the extracted creds *are* the browser's linked device — close the WA Web tab (don't log out, that revokes it), one live connection per companion; and this only clears **Tier-1** (login-time passkey). Tier-2 Business accounts still `428` — delete + re-register as Personal is the only escape. The linked device shows as "Google Chrome (Windows)", not a custom `browser` name.
+
 ```js
 sock.ev.on('pair-passkey.request', async ({ publicKey }) => {
   // publicKey = WebAuthn PublicKeyCredentialRequestOptions (JSON)
@@ -2007,7 +2026,7 @@ sock.ev.on('settings.update', (update) => {})
 
 ## 🛠️ Fork Highlights
 
-- 🔐 Passkey (Shortcake/CRSC) device-linking flow
+- 🔐 Passkey (Shortcake/CRSC) device-linking flow + browser-auth bridge
 - 📞 Full VoIP call signalling (callKey, mute, waiting room, detailed reasons)
 - 🔒 Spoofing guards on self-only protocol messages
 - 🖼️ Fixed media uploads to newsletters (upstream bug)

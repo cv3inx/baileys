@@ -25,6 +25,7 @@ export namespace Curve {
         private: any;
         public: any;
     };
+    function publicKeyFromPrivate(privateKey: any): Buffer;
     function sharedKey(privateKey: any, publicKey: any): any;
     function sign(privateKey: any, buf: any): any;
     function verify(pubKey: any, message: any, signature: any): boolean;
