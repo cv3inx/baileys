@@ -56,10 +56,10 @@
    "peerDependencies": {
       "@napi-rs/image": "~1.12.0",
       "audio-decode": "^2.2.3",
-      "better-sqlite3": "^11.0.0",
-      "jimp": "^1.6.1",
+      "better-sqlite3": "^12.1.1",
+      "jimp": "^0.22.12",
       "link-preview-js": "^3.0.0",
-      "sharp": "*"
+      "sharp": "0.34.5"
    },
    "peerDependenciesMeta": {
       "@napi-rs/image": {

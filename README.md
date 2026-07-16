@@ -1532,12 +1532,14 @@ else if (lib.image?.Transformer) {
 }
 
 // --- If jimp installed
-else if (lib.jimp?.Jimp) {
-   const img = await lib.jimp.Jimp.read(bufferOrFilePath)
+else if (lib.jimp?.default) {
+   const Jimp = lib.jimp.default
+   const img = await Jimp.read(bufferOrFilePath)
 
    output = await img
-      .resize({ w: width, mode: lib.jimp.ResizeStrategy.BILINEAR })
-      .getBuffer('image/jpeg', { quality: 50 })
+      .resize(width, Jimp.AUTO, Jimp.RESIZE_BILINEAR)
+      .quality(50)
+      .getBufferAsync(Jimp.MIME_JPEG)
 }
 
 // --- Fallback
