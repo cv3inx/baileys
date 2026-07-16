@@ -59,7 +59,7 @@
       "better-sqlite3": "^12.1.1",
       "jimp": "^0.22.12",
       "link-preview-js": "^3.0.0",
-      "sharp": "0.34.5"
+      "sharp": "0.34.6"
    },
    "peerDependenciesMeta": {
       "@napi-rs/image": {
