@@ -1,4 +1,9 @@
 /**
+ * True when the native XEdDSA sign/verify path passed its load-time self-test.
+ * False means the ~120x slower pure-JS libsignal fallback is in use.
+ */
+export function isNativeCurveEnabled(): boolean;
+/**
  * encrypt AES 256 GCM;
  * where the tag tag is suffixed to the ciphertext
  * */
