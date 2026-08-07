@@ -1,4 +1,5 @@
 export * from "../WAProto/index.js";
+export { makeLibSignalRepository } from "./Signal/libsignal.js";
 export * from "./Utils/index.js";
 export * from "./Types/index.js";
 export * from "./Store/index.js";
