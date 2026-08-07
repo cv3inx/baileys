@@ -1,5 +1,8 @@
 .claude/
 node_modules/
-.yarn*
-.pnp*
+# ignore yarn's local state, but keep .yarnrc.yml tracked — it pins nodeLinker
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+.pnp.*
 yarn.lock
